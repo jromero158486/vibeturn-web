@@ -1,183 +1,232 @@
 <!doctype html>
 <meta charset="utf-8" />
-<title>VibeTurn – Guía de Posturas</title>
+<title>VibeTurn – Asistente de Giro</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{
-    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --bg:#f6f8fb; --fg:#0b132b;
-    --card:#fff; --line:#e5e7eb; --brand:#2563eb;
+    --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626; --bg:#f6f8fb; --fg:#0b132b; --brand:#2563eb;
+    --card:#fff; --line:#e5e7eb;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--fg)}
-  header{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid var(--line);
-         display:flex;align-items:center;justify-content:space-between;padding:14px 18px}
+  header{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--line);
+         display:flex;align-items:center;justify-content:space-between;padding:12px 14px}
   h1{margin:0;font-size:18px}
-  .btn{padding:10px 14px;border:0;border-radius:12px;background:var(--brand);color:#fff;
-       font-weight:700;cursor:pointer}
-  .btn.ghost{background:#edf2ff;color:#1e40af}
-  .btn.danger{background:#ef4444}
+  .btn{padding:10px 14px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
+  .btn.ghost{background:#e7efff;color:#1e40af}
+  .btn.danger{background:#dc2626}
   .chip{padding:6px 10px;border-radius:999px;background:#eef2f7;font-weight:700}
   .chip.ok{background:#dcfce7;color:#065f46} .chip.bad{background:#fee2e2;color:#991b1b}
-  main{max-width:980px;margin:16px auto;padding:0 12px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+  main{max-width:880px;margin:14px auto;padding:0 12px;display:grid;grid-template-columns:340px 1fr;gap:16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
   .hint{color:#64748b;font-size:13px}
-  .guide{display:grid;gap:12px}
-  .panel{border:2px solid #b9c6d4;border-radius:16px;background:#e3f2ed;padding:12px}
-  .panel h3{margin:0 0 6px;font-size:14px}
-  .mini{width:100%;height:130px}
-  .targets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-  .tg{border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#fff}
-  .tg.active{outline:2px solid var(--brand);background:#f5f8ff}
-  .stage{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
-  .big{min-height:480px;display:grid;grid-template-rows:auto 1fr auto auto;gap:12px}
-  .hdr{display:flex;gap:10px;align-items:center;padding:16px 18px;color:#fff;font-weight:800}
+  .big-step{border-radius:16px;border:1px solid var(--line);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;min-height:460px}
+  .hdr{padding:14px 16px;display:flex;align-items:center;gap:10px;color:#fff;font-weight:800}
   .circle{width:28px;height:28px;border-radius:999px;border:2px solid #fff;display:grid;place-items:center}
-  .manikin{display:flex;align-items:center;justify-content:center;padding:6px 18px}
-  svg#mainSVG{width:320px;height:320px}
-  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px}
-  .box{background:#ffffff66;border:1px solid #ffffffaa;border-radius:12px;padding:10px;text-align:center}
-  .bigfont{font-size:28px;font-weight:900}
-  .progress{height:10px;background:#ffffff77;border-radius:12px;overflow:hidden;margin:0 18px}
-  .progress>div{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#84cc16);transition:width .2s}
-  .foot{display:flex;justify-content:space-between;align-items:center;color:#fff;font-weight:800;padding:10px 18px 18px}
-  .foot .btn{opacity:.6} .foot .btn.ready{opacity:1}
-  .log{font:12px ui-monospace,Consolas,monospace;background:#0b132b;color:#e5e7eb;border-radius:12px;padding:10px;max-height:160px;overflow:auto;line-height:1.35}
+  .center{display:flex;align-items:center;justify-content:center}
+  .statusLamp{width:170px;height:170px;border-radius:999px;border:10px solid #0001; background:#ccc}
+  .lamp-ok{background:var(--ok)} .lamp-warn{background:var(--warn)} .lamp-bad{background:var(--bad)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 16px}
+  .kpis .box{background:#ffffffcc;border:1px solid #ffffffbb;border-radius:12px;text-align:center;padding:10px}
+  .big{font-size:28px;font-weight:900}
+  .targets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tg{border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#fff}
+  .tg.active{outline:2px solid var(--brand);background:#f0f5ff}
+  .log{font:12px ui-monospace,Consolas,monospace;background:#0b132b;color:#e5e7eb;border-radius:12px;padding:10px;max-height:160px;overflow:auto}
+  /* SVG cama + persona (simple pero claro) */
+  svg#scene{width:320px;height:280px}
+  .bed{fill:#cfd8e3} .rail{fill:#9aa7b8}
+  .skin{fill:#f1c29a} .cloth{fill:#6fa8dc}
 </style>
 
 <header>
-  <h1>🌀 VibeTurn – Guía de Posturas</h1>
+  <h1>🌀 VibeTurn – Asistente de Giro</h1>
   <div style="display:flex;gap:8px;align-items:center">
     <span id="bleChip" class="chip">BLE: Desconectado</span>
     <button id="bReconnect" class="btn ghost">Reconectar</button>
     <button id="bConnect" class="btn">Conectar</button>
     <button id="bPair" class="btn">Emparejar…</button>
+    <button id="bReset" class="btn ghost">Reset</button>
     <button id="bDisconnect" class="btn danger">Desconectar</button>
-    <button id="bReset" class="btn ghost">Recalibrar</button>
   </div>
 </header>
 
 <main>
+  <!-- COLUMNA IZQUIERDA: Selección de objetivo + guía -->
   <section class="card">
-    <h2>Guía visual</h2>
-    <div class="guide">
-      <div class="panel">
-        <h3>ACOSTADO BOCA ARRIBA (supina)</h3>
-        <svg class="mini" viewBox="0 0 120 50">
-          <rect x="8" y="36" width="104" height="6" rx="3" fill="#a6b4c2"/>
-          <rect x="18" y="26" width="10" height="6" rx="3" fill="#ffd6a5"/>
-          <rect x="28" y="24" width="40" height="12" rx="4" fill="#6fa8dc"/>
-          <circle cx="22" cy="28" r="5" fill="#f2c29b"/>
-          <rect x="68" y="24" width="10" height="6" rx="3" fill="#6fa8dc"/>
-          <rect x="50" y="36" width="6" height="10" rx="2" fill="#6fa8dc"/>
-          <rect x="58" y="36" width="6" height="10" rx="2" fill="#6fa8dc"/>
-        </svg>
-      </div>
-      <div class="panel">
-        <h3>ACOSTADO DE COSTADO (lateral)</h3>
-        <svg class="mini" viewBox="0 0 120 50">
-          <rect x="8" y="36" width="104" height="6" rx="3" fill="#a6b4c2"/>
-          <g transform="translate(60,31) rotate(38) translate(-60,-31)">
-            <rect x="18" y="26" width="10" height="6" rx="3" fill="#ffd6a5"/>
-            <rect x="28" y="24" width="40" height="12" rx="4" fill="#6fa8dc"/>
-            <circle cx="22" cy="28" r="5" fill="#f2c29b"/>
-            <rect x="68" y="24" width="10" height="6" rx="3" fill="#6fa8dc"/>
-            <rect x="50" y="36" width="6" height="10" rx="2" fill="#6fa8dc"/>
-            <rect x="58" y="36" width="6" height="10" rx="2" fill="#6fa8dc"/>
-          </g>
-        </svg>
-      </div>
+    <h2>Objetivo de postura</h2>
+    <div class="targets">
+      <div class="tg" data-goal="supina"><b>Supina (boca arriba)</b><div class="hint">|ángulo| &lt; 10°</div></div>
+      <div class="tg" data-goal="lateral"><b>Lateral</b><div class="hint">30° – 60° (cualquier lado)</div></div>
     </div>
 
-    <h2 style="margin-top:12px">Objetivo de postura</h2>
-    <div class="targets" id="targets">
-      <div class="tg" data-goal="supina"><b>Supina</b><div class="hint">|ángulo| &lt; 10°</div></div>
-      <div class="tg" data-goal="lat_izq"><b>Lateral izquierda</b><div class="hint">−30° a −60°</div></div>
-      <div class="tg" data-goal="lat_der"><b>Lateral derecha</b><div class="hint">+30° a +60°</div></div>
-    </div>
+    <h2 style="margin-top:14px">Guía visual</h2>
+    <div class="hint">Rojo = mover; Amarillo = casi; Verde = listo</div>
+    <svg id="scene" viewBox="0 0 140 120" aria-label="Paciente">
+      <!-- cama -->
+      <rect class="rail" x="10" y="95" rx="4" width="120" height="8"/>
+      <rect class="bed"  x="14" y="80" rx="4" width="112" height="16"/>
+      <!-- paciente (rotado por JS) -->
+      <g id="patient" transform="translate(70,86) rotate(0) translate(-70,-86)">
+        <!-- almohada -->
+        <rect x="28" y="72" width="16" height="8" rx="3" fill="#ffd6a5"/>
+        <!-- cabeza -->
+        <circle class="skin" cx="24" cy="76" r="6"/>
+        <!-- tronco -->
+        <rect class="cloth" x="32" y="68" rx="5" width="44" height="18"/>
+        <!-- brazos -->
+        <rect class="cloth" x="24" y="68" rx="3" width="10" height="8"/>
+        <rect class="cloth" x="76" y="68" rx="3" width="10" height="8"/>
+        <!-- piernas -->
+        <rect class="cloth" x="54" y="86" rx="3" width="7" height="16"/>
+        <rect class="cloth" x="63" y="86" rx="3" width="7" height="16"/>
+      </g>
+    </svg>
 
-    <h2 style="margin-top:12px">Registro</h2>
+    <h2 style="margin-top:14px">Registro</h2>
     <div id="log" class="log">—</div>
   </section>
 
-  <section class="stage">
-    <div id="panel" class="big" style="background:#f3b0b5">
-      <div class="hdr"><div class="circle">1</div> Coloca las manos como se muestra. Gira hasta que la pantalla esté VERDE.</div>
-
-      <div class="manikin">
-        <svg id="mainSVG" viewBox="0 0 120 120">
-          <rect x="10" y="90" width="100" height="8" rx="4" fill="#b1becc"/>
-          <g id="patient" transform="translate(60,82) rotate(0) translate(-60,-82)">
-            <rect x="25" y="62" width="12" height="8" rx="3" fill="#ffd6a5"/>
-            <circle cx="22" cy="66" r="6.5" fill="#f2c29b"/>
-            <rect x="31" y="60" width="38" height="16" rx="5" fill="#6fa8dc"/>
-            <rect x="22" y="60" width="10" height="8" rx="3" fill="#6fa8dc"/>
-            <rect x="69" y="60" width="10" height="8" rx="3" fill="#6fa8dc"/>
-            <rect x="52" y="76" width="7" height="16" rx="3" fill="#6fa8dc"/>
-            <rect x="60" y="76" width="7" height="16" rx="3" fill="#6fa8dc"/>
-            <circle cx="53" cy="58" r="3" fill="#89e2b1"/>
-          </g>
-        </svg>
+  <!-- COLUMNA DERECHA: Paso único “mueve hasta verde” -->
+  <section class="big-step" id="panel" style="background:#f7b4b7">
+    <div class="hdr"><div class="circle">1</div> Mueve al paciente hasta que el indicador esté <b>VERDE</b>.</div>
+    <div class="center" style="gap:22px;flex-direction:column">
+      <div id="lamp" class="statusLamp lamp-bad" aria-label="Indicador"></div>
+      <div class="kpis" style="width:100%;max-width:560px">
+        <div class="box"><div class="big" id="angleTxt">—</div><div>Ángulo</div></div>
+        <div class="box"><div class="big" id="poseTxt">—</div><div>Postura</div></div>
+        <div class="box"><div class="big" id="goalTxt">—</div><div>Objetivo</div></div>
       </div>
-
-      <div class="kpi">
-        <div class="box"><div class="bigfont" id="angleTxt">—</div><div>Ángulo</div></div>
-        <div class="box"><div class="bigfont" id="poseTxt">—</div><div>Postura detectada</div></div>
-        <div class="box"><div class="bigfont" id="goalTxt">—</div><div>Objetivo</div></div>
-      </div>
-
-      <div class="progress"><div id="bar"></div></div>
-
-      <div class="foot">
-        <div>DESLIZA CUANDO ESTÉ EN VERDE</div>
-        <button id="bSwipe" class="btn" disabled>Continuar</button>
-      </div>
+    </div>
+    <div class="center" style="padding:12px 16px">
+      <button id="bConfirm" class="btn" disabled>Confirmar (cuando esté VERDE)</button>
     </div>
   </section>
 </main>
 
 <script>
+/* ====== BLE UUIDs (NUS) ====== */
 const NUS_SERVICE='6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const NUS_TX='6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 const NUS_RX='6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
+/* ====== estado ====== */
 let device=null, server=null, txChar=null, rxChar=null, _buf='';
-const enc=s=>new TextEncoder().encode(s+'\n');
-const $=s=>document.querySelector(s);
-function log(t){const el=$('#log');const ts=new Date().toLocaleTimeString();el.textContent=(el.textContent==='—')?`[${ts}] ${t}`:el.textContent+`\n[${ts}] ${t}`;el.scrollTop=el.scrollHeight;}
-function setBLE(t,ok=false){const el=$('#bleChip');el.textContent=t;el.className='chip '+(ok?'ok':'bad');}
-function setBG(z){$('#panel').style.background=z==='ok'?'#7bd49a':(z==='warn'?'#f3cc86':'#f3b0b5');}
-function progress(p){$('#bar').style.width=Math.max(0,Math.min(100,p))+'%';}
+const enc = s=>new TextEncoder().encode(s+'\n');
+const $ = s=>document.querySelector(s);
 
-/* --- Objetivo y lógica --- */
-const BANDS={supina:a=>Math.abs(a)<10,lat_izq:a=>a<=-30&&a>=-60,lat_der:a=>a>=30&&a<=60};
-let goal='lat_der',hold=0,holdNeeded=10,lastT=0;
-function setGoal(g){goal=g;document.querySelectorAll('.tg').forEach(x=>x.classList.toggle('active',x.dataset.goal===g));$('#goalTxt').textContent=g.replace('_',' ');hold=0;progress(0);log('Objetivo: '+g);}
-document.querySelectorAll('.tg').forEach(el=>el.onclick=()=>setGoal(el.dataset.goal));setGoal('lat_der');
-function rotatePatient(a){$('#patient').setAttribute('transform',`translate(60,82) rotate(${a}) translate(-60,-82)`);}
-function detectPose(a){if(BANDS.supina(a))return'supina';if(BANDS.lat_izq(a))return'lateral izq';if(BANDS.lat_der(a))return'lateral der';return'indefinida';}
-function update(a){rotatePatient(a);$('#angleTxt').textContent=`${a.toFixed(1)}°`;$('#poseTxt').textContent=detectPose(a);
-  const abs=Math.abs(a);const zone=abs<10?'bad':abs<30?'warn':'ok';setBG(zone);
-  const ok=(goal==='supina'&&BANDS.supina(a))||(goal==='lat_izq'&&BANDS.lat_izq(a))||(goal==='lat_der'&&BANDS.lat_der(a));
-  const now=performance.now();if(!lastT)lastT=now;const dt=(now-lastT)/1000;lastT=now;if(ok){hold+=dt;}else{hold=Math.max(0,hold-2*dt);}progress((hold/holdNeeded)*100);
-  const ready=(hold>=holdNeeded)&&zone==='ok';const b=$('#bSwipe');b.disabled=!ready;b.classList.toggle('ready',ready);}
-$('#bSwipe').onclick=()=>{alert('✅ Postura confirmada');hold=0;progress(0);};
+/* ====== UI ====== */
+function log(t){ const el=$('#log'); const ts=new Date().toLocaleTimeString();
+  el.textContent=(el.textContent==='—')?`[${ts}] ${t}`:el.textContent+`\n[${ts}] ${t}`; el.scrollTop=el.scrollHeight; }
+function setBLE(text,ok=false){ const el=$('#bleChip'); el.textContent=text; el.className='chip '+(ok?'ok':'bad'); }
+function setLamp(zone){
+  const l=$('#lamp'); l.className='statusLamp '+
+    (zone==='ok'?'lamp-ok':zone==='warn'?'lamp-warn':'lamp-bad');
+  $('#panel').style.background = zone==='ok' ? '#96e1ac' : (zone==='warn'?'#f3d193':'#f7b4b7');
+}
 
-/* --- BLE robusto con emparejar y reconectar --- */
-function uiLog(m){log(m);console.log('[BLE]',m);}
-async function _setupGatt(g){const s=await g.getPrimaryService(NUS_SERVICE);txChar=await s.getCharacteristic(NUS_TX);rxChar=await s.getCharacteristic(NUS_RX);
-  await txChar.startNotifications();txChar.addEventListener('characteristicvaluechanged',e=>{_buf+=new TextDecoder().decode(e.target.value);
-  let lines=_buf.split(/\r?\n/);_buf=lines.pop();for(const l of lines){const s=l.trim();const m=s.match(/^ANGLE\s+([-+]?\d+(?:\.\d+)?)$/i);
-  if(m){update(parseFloat(m[1]));continue;}if(s==='PONG')uiLog('PONG');if(s.startsWith('{')&&s.endsWith('}'))uiLog('STATUS '+s);}});}
-async function connectBy(mode='service'){let dev=null;if(mode==='reconnect'){const remembered=await navigator.bluetooth.getDevices?.()||[];
-  const d=remembered.find(d=>(d.uuids||[]).includes(NUS_SERVICE));if(!d){uiLog('No hay dispositivos recordados. Usa Emparejar…');return;}dev=d;}
-  else{try{dev=await navigator.bluetooth.requestDevice(mode==='all'?{acceptAllDevices:true,optionalServices:[NUS_SERVICE]}:{filters:[{services:[NUS_SERVICE]}],optionalServices:[NUS_SERVICE]});}
-  catch(e){if(e.name==='NotFoundError'){uiLog('Selección cancelada.');return;}throw e;}}device=dev;device.addEventListener('gattserverdisconnected',onDisconnected);
-  server=await device.gatt.connect();await _setupGatt(server);setBLE('BLE: Conectado',true);uiLog('Conectado a: '+(device.name||'(sin nombre)'));}
-async function connectBLE(){uiLog('Conectar → filtro por servicio…');try{await connectBy('service');}catch(e){uiLog('Fallo con filtro. Abriendo selector completo…');await connectBy('all');}}
-async function pairBLE(){uiLog('Emparejar → selector completo…');await connectBy('all');}
-async function reconnectBLE(){uiLog('Reconectar → dispositivos recordados…');await connectBy('reconnect');}
-function onDisconnected(){setBLE('BLE: Desconectado',false);uiLog('Dispositivo desconectado.');txChar=rxChar=server=device=null;}
-async function disconnectBLE(){try{if(device?.gatt?.connected)device.gatt.disconnect();}catch(e){}onDisconnected();}
-$('#bConnect').onclick=connectBLE;$('#bPair').onclick=pairBLE;$('#bReconnect').onclick=reconnectBLE;$('#bDisconnect').onclick=disconnectBLE;$('#bReset').onclick=()=>rxChar?.writeValue(enc('RESET'));
-log('Listo. Usa Emparejar… para agregar tu placa y Reconectar en siguientes sesiones.');
+/* ====== objetivos: simple (supina ↔ lateral) ====== */
+const BANDS = {
+  supina: a => Math.abs(a) < 10,          // centrado
+  lateral: a => Math.abs(a) >= 30 && Math.abs(a) <= 60  // cualquiera de los lados
+};
+let goal='lateral';
+function setGoal(g){
+  goal=g;
+  document.querySelectorAll('.tg').forEach(x=>x.classList.toggle('active', x.dataset.goal===g));
+  $('#goalTxt').textContent = g;
+  log('Objetivo: '+g);
+}
+document.querySelectorAll('.tg').forEach(el=>el.onclick=()=>setGoal(el.dataset.goal));
+setGoal('lateral');
+
+/* ====== dibujo ====== */
+function rotatePatient(a){
+  const g=document.getElementById('patient');
+  g.setAttribute('transform',`translate(70,86) rotate(${a}) translate(-70,-86)`);
+}
+
+/* ====== lógica con umbrales simples ====== */
+let hold=0, need=6, lastT=0; // 6 s en verde para confirmar
+function detect(a){
+  if (BANDS.supina(a)) return 'supina';
+  if (BANDS.lateral(a)) return 'lateral';
+  return 'intermedia';
+}
+function update(a){
+  rotatePatient(a);
+  $('#angleTxt').textContent = `${a.toFixed(1)}°`;
+  $('#poseTxt').textContent  = detect(a);
+
+  // color del semáforo grande
+  const abs = Math.abs(a);
+  const zone = abs<10 ? (goal==='supina'?'ok':'bad')
+             : abs<30 ? 'warn'
+             : abs<=60 ? (goal==='lateral'?'ok':'warn')
+             : 'bad';
+  setLamp(zone);
+
+  // temporizador de “mantener”
+  const now=performance.now(); if(!lastT) lastT=now; const dt=(now-lastT)/1000; lastT=now;
+  if (zone==='ok') hold+=dt; else hold=Math.max(0, hold-2*dt);
+
+  const ready = hold>=need;
+  $('#bConfirm').disabled = !ready;
+}
+
+/* ====== BLE robusto: Emparejar / Reconectar / Conectar ====== */
+function onDisconnected(){ setBLE('BLE: Desconectado',false); log('Dispositivo desconectado.'); txChar=rxChar=server=device=null; }
+async function _setupGatt(g){
+  const svc=await g.getPrimaryService(NUS_SERVICE);
+  txChar=await svc.getCharacteristic(NUS_TX);
+  rxChar=await svc.getCharacteristic(NUS_RX);
+  await txChar.startNotifications();
+  txChar.addEventListener('characteristicvaluechanged', e=>{
+    _buf += new TextDecoder().decode(e.target.value);
+    let lines=_buf.split(/\r?\n/); _buf=lines.pop();
+    for(const line of lines){
+      const s=line.trim(); const m=s.match(/^ANGLE\s+([-+]?\d+(?:\.\d+)?)$/i);
+      if (m){ update(parseFloat(m[1])); continue; }
+    }
+  });
+}
+async function connectBy(mode='service'){
+  let dev=null;
+  if(mode==='reconnect'){
+    const rem = await navigator.bluetooth.getDevices?.()||[];
+    const d = rem.find(d=>(d.uuids||[]).includes(NUS_SERVICE));
+    if(!d){ log('No hay dispositivos recordados. Usa Emparejar…'); return; }
+    dev=d;
+  }else{
+    try{
+      dev = await navigator.bluetooth.requestDevice(
+        mode==='all'
+          ? { acceptAllDevices:true, optionalServices:[NUS_SERVICE] }
+          : { filters:[{ services:[NUS_SERVICE] }], optionalServices:[NUS_SERVICE] }
+      );
+    }catch(e){ if(e.name==='NotFoundError'){ log('Selección cancelada.'); return; } throw e; }
+  }
+  device=dev; device.addEventListener('gattserverdisconnected', onDisconnected);
+  server=await device.gatt.connect(); await _setupGatt(server);
+  setBLE('BLE: Conectado',true); log('Conectado a: '+(device.name||'(sin nombre)'));
+}
+async function connectBLE(){ try{ await connectBy('service'); }catch(e){ log('Fallo con filtro. Probando selector completo…'); await connectBy('all'); } }
+async function pairBLE(){ await connectBy('all'); }
+async function reconnectBLE(){ await connectBy('reconnect'); }
+async function disconnectBLE(){ try{ if(device?.gatt?.connected) device.gatt.disconnect(); }catch(_){ } onDisconnected(); }
+
+document.getElementById('bConnect').onclick = connectBLE;
+document.getElementById('bPair').onclick = pairBLE;
+document.getElementById('bReconnect').onclick = reconnectBLE;
+document.getElementById('bDisconnect').onclick = disconnectBLE;
+document.getElementById('bReset').onclick = ()=> rxChar?.writeValue(enc('RESET'));
+
+/* ====== Confirmación ====== */
+document.getElementById('bConfirm').onclick = ()=>{
+  alert('✅ Posición confirmada');
+  hold=0; // reinicia
+};
+
+/* ====== Mensaje inicial ====== */
+log('Conecta por Bluetooth. Selecciona el objetivo (Supina / Lateral) y mueve al paciente hasta que el semáforo esté VERDE.');
 </script>
